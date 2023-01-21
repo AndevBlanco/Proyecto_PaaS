@@ -1,5 +1,5 @@
 from flask import Flask, render_template, session, abort, redirect, request
-import database, os, pathlib, requests
+import database, os, pathlib, requests, json
 from dotenv import load_dotenv
 from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
@@ -21,12 +21,18 @@ flow = Flow.from_client_secrets_file(
     redirect_uri="http://127.0.0.1:8500/callback"
 )
 
+
 client = os.getenv("DB_URI")
 
 @app.route('/')
 def index():
-    print(os.getenv("GOOGLE_CLIENT_ID"))
     return render_template('index.html')
+
+@app.route('/home')
+def home():
+    print(session)
+    return render_template('home.html')
+
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -38,8 +44,6 @@ def login():
 @app.route("/callback")
 def callback():
     flow.fetch_token(authorization_response=request.url)
-    if not session["state"] == request.args["state"]:
-        abort(500) 
     credentials = flow.credentials
     request_session = requests.session()
     cached_session = cachecontrol.CacheControl(request_session)
@@ -51,7 +55,7 @@ def callback():
     )
     session['goole_id'] = id_info.get("sub")
     session['name'] = id_info.get("name")
-    return redirect("/protected_area")
+    return redirect("/home")
 
 @app.route("/logout")
 def logout():
@@ -71,3 +75,17 @@ def test():
 
 def logout():
     session.clear()
+
+@app.route("/create")
+def create():
+    return render_template("create.html")
+
+@app.route("/create", methods=['POST'])
+def save_game():
+    obj = json.loads('[{}]'.format(request.form['caches']))
+    for i in range(0, len(obj)):
+        obj[i]['clue'] = request.form['clue' + str(i)]
+        
+    database.db.game.insert_one({"uuid": session['google_id'], "name": request.form['game_name'], "north": request.form['north'], "south": request.form['south'], "east": request.form['east'], "west": request.form['west'], "caches": obj})
+    return render_template("create.html")
+

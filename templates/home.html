@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="vh-100 bg-primary">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="card shadow-2-strong" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+  
+                        <h4 class="mb-5">Bienvenido</h4>
+            
+                        <hr class="my-4">
+                        <a class="btn btn-lg btn-block btn-success" href="/create">Crear Juego</a>
+                        <form action="/create" method="post">
+                            <button class="btn btn-lg btn-block btn-success">Crear Juego</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

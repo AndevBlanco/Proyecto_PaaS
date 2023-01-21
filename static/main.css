@@ -1,7 +1,22 @@
-.divider:after,
-.divider:before {
-content: "";
-flex: 1;
-height: 1px;
-background: #eee;
+.divider:after, .divider:before {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #eee;
+}
+
+img {
+    max-height: 100%;
+}
+
+.mapa {
+    margin: 0;
+    height: 600px;
+    width: 600px;
+}
+
+#map {
+    height: 500px;
+    background-color: red;
+    width: 100%;
 }
