@@ -78,6 +78,7 @@ def logout():
 
 @app.route("/create")
 def create():
+    print(session)
     return render_template("create.html")
 
 @app.route("/create", methods=['POST'])
@@ -85,7 +86,7 @@ def save_game():
     obj = json.loads('[{}]'.format(request.form['caches']))
     for i in range(0, len(obj)):
         obj[i]['clue'] = request.form['clue' + str(i)]
-        
-    database.db.game.insert_one({"uuid": session['google_id'], "name": request.form['game_name'], "north": request.form['north'], "south": request.form['south'], "east": request.form['east'], "west": request.form['west'], "caches": obj})
+
+    database.db.game.insert_one({"uuid": session['goole_id'], "name": request.form['game_name'], "north": request.form['north'], "south": request.form['south'], "east": request.form['east'], "west": request.form['west'], "caches": obj})
     return render_template("create.html")
 
