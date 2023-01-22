@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, abort, redirect, request
+from flask import Flask, render_template, session, abort, redirect, request, url_for
 import database, os, pathlib, requests, json
 from dotenv import load_dotenv
 from google.oauth2 import id_token
@@ -24,14 +24,39 @@ flow = Flow.from_client_secrets_file(
 
 client = os.getenv("DB_URI")
 
+def login_is_required(function):
+    def wrapper(*args, **kwargs):
+        if "google_id" not in session:
+            return abort(401)  # Authorization required
+        else:
+            return function()
+
+    return wrapper
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @app.route('/home')
+@login_is_required
 def home():
-    print(session)
-    return render_template('home.html')
+    game_list = {
+        'my_games': [],
+        'games': []
+    }
+    game_list_db = database.db.games.find()
+    for i in game_list_db:
+        if(i['winner_name'] == ''):
+                i['winner_name'] = 'Pendiente'
+
+        if(i['user_uuid'] == session['google_id']):
+            game_list['my_games'].append(i)
+        else:
+            game_list['games'].append(i)
+
+    print(game_list)
+
+    return render_template('home.html', games_list=game_list)
 
 
 @app.route('/login', methods=['POST'])
@@ -53,8 +78,12 @@ def callback():
         request=token_request,
         audience=GOOGLE_CLIENT_ID
     )
-    session['goole_id'] = id_info.get("sub")
+    session['google_id'] = id_info.get("sub")
     session['name'] = id_info.get("name")
+    user_exist = database.db.users.find_one({"uuid": session['google_id']})
+    if(not user_exist):
+        database.db.users.insert_one({"uuid": session['google_id'], "name": session['name']})
+    print(session['google_id'])
     return redirect("/home")
 
 @app.route("/logout")
@@ -87,6 +116,6 @@ def save_game():
     for i in range(0, len(obj)):
         obj[i]['clue'] = request.form['clue' + str(i)]
 
-    database.db.game.insert_one({"uuid": session['goole_id'], "name": request.form['game_name'], "north": request.form['north'], "south": request.form['south'], "east": request.form['east'], "west": request.form['west'], "caches": obj})
+    database.db.games.insert_one({"user_uuid": session['google_id'], "user_name": session['name'], "name": request.form['game_name'], "north": request.form['north'], "south": request.form['south'], "east": request.form['east'], "west": request.form['west'], "caches": obj, "number_caches": len(obj), "winner_name": "", "active": True})
     return render_template("create.html")
 
