@@ -1,3 +1,6 @@
+.custom-bg {
+    background: linear-gradient(90deg, rgb(110,94,254) 0%, rgba(73,63,252,1) 100%)!important;
+}
 .divider:after, .divider:before {
     content: "";
     flex: 1;
