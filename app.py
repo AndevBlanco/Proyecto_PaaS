@@ -5,6 +5,7 @@ from google.oauth2 import id_token
 from google_auth_oauthlib.flow import Flow
 from pip._vendor import cachecontrol
 import google.auth.transport.requests
+from bson.objectid import ObjectId
 
 load_dotenv()
 
@@ -41,6 +42,7 @@ def index():
 @login_is_required
 def home():
     game_list = {
+        'user_name': session['name'],
         'my_games': [],
         'games': []
     }
@@ -119,3 +121,23 @@ def save_game():
     database.db.games.insert_one({"user_uuid": session['google_id'], "user_name": session['name'], "name": request.form['game_name'], "north": request.form['north'], "south": request.form['south'], "east": request.form['east'], "west": request.form['west'], "caches": obj, "number_caches": len(obj), "winner_name": "", "active": True})
     return render_template("create.html")
 
+@app.route("/play")
+def play():
+    game_id = request.args.get('game')
+    game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
+    return render_template("play.html", game_data=game_data_db)
+
+@app.route("/game")
+def game():
+    game_id = request.args.get('game')
+    game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
+
+    return render_template("game.html", game_data=game_data_db)
+
+@app.route("/game", methods=["POST"])
+def restart():
+    if(request.method == "POST"):
+        print("helooo")
+        # game_data_db = database.db.games.update_one({"_id": ObjectId(game_id)})
+    
+    return 'helo'

@@ -6,7 +6,7 @@
             <div class="col-12 w-100 col-md-8 col-lg-6 col-xl-5">
                 <div class="card shadow-2-strong" style="border-radius: 1rem;">
                     <div class="card-body p-5 text-center">
-                        <h4 class="mb-3">Bienvenido</h4>
+                        <h4 class="mb-3">Bienvenido {{games_list.user_name}}</h4>
                         <hr>
                         <div class="row justify-content-start my-4">
                             <div class="col-12">
@@ -26,7 +26,7 @@
                                         {% for game in games_list.games %}
                                         <tr>
                                             {% if game.active %}
-                                                <th scope="row"><a href="">{{game.name}}</a></th>
+                                                <th scope="row"><a href="/play?game={{game._id}}">{{game.name}}</a></th>
                                             {% else %}
                                                 <th scope="row">{{game.name}}</th>
                                             {% endif %}
@@ -59,7 +59,7 @@
                                     <tbody id="myGameList">
                                         {% for game in games_list.my_games %}
                                         <tr>
-                                            <th scope="row">{{game.name}}</th>
+                                            <th scope="row"><a href="/game?game={{game._id}}">{{game.name}}</a></th>
                                             <td>{{game.number_caches}}</td>
                                             <td>{{game.number_caches}}</td>
                                             <td>{{game.number_caches}}</td>
