@@ -18,6 +18,7 @@
                                             <th scope="col">Creador</th>
                                             <th scope="col">Número de caches</th>
                                             <th scope="col">Encontradas</th>
+                                            <th scope="col">Restantes</th>
                                             <th scope="col">Usuarios activos</th>
                                             <th scope="col">Ganador</th>
                                         </tr>
@@ -32,8 +33,9 @@
                                             {% endif %}
                                             <td>{{game.user_name}}</td>
                                             <td>{{game.number_caches}}</td>
-                                            <td>{{game.number_caches}}</td>
-                                            <td>{{game.number_caches}}</td>
+                                            <td>{{game.number_caches_found}}</td>
+                                            <td>{{game.number_caches_left}}</td>
+                                            <td>{{game.active_users}}</td>
                                             <td>{{game.winner_name}}</td>
                                         </tr>
                                         {% endfor %}

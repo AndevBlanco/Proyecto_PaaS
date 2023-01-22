@@ -48,13 +48,13 @@ $('#map').click(function (event) {
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title">Pista ${count}</h5>
+                                <h5 class="modal-title">Pista</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                         <div class="modal-body">
                             <input type="text" class="form-control w-100" name="clue${count}" placeholder="Pista" required>
                             <br>
-                            <input type="file" name="image${count}" accept="image/png, image/gif, image/jpeg, image/jpg" />
+                            <input class="btn btn-info" type="file" name="image${count}" accept="image/png, image/gif, image/jpeg, image/jpg" />
                         </div>
                         </div>
                     </div>
