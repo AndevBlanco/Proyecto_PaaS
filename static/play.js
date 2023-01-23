@@ -37,6 +37,8 @@ var transform_obj3 = transform_obj2.replace(/True/g, true);
 console.log(transform_obj3);
 var obj = JSON.parse(transform_obj3);
 for(var i in obj){
+    let coords = L.latLng(obj[i]['latitude'], obj[i]['longitude']);
+    new L.marker(coords).addTo(map);
     // new L.marker(L.latLng(obj[i]['latitude'], obj[i]['longitude'])).addTo(map);
     if(!obj[i]['found']){
         $('#rowCachesFound').append(
