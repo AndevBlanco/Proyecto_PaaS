@@ -152,11 +152,6 @@ def play():
     game_id = request.args.get('game')
     if(game_id):
         game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
-        # for i in range(0, len(game_data_db['caches'])):
-        #     if(i < len(game_data_db['caches'])):
-        #         if(game_data_db['caches'][i]['found'] == True):
-        #             del game_data_db['caches'][i]
-        #             i -= 1
 
         if(game_data_db['winner_name'] == session['name']):
             game_data_db['winner_you'] = '¡Enhorabuena {}, eres el ganador del juego! \n ¡Vaya pedazo de crack!'.format(session['name'])
@@ -176,15 +171,21 @@ def save_play():
             game_data_db['number_caches_found'] = game_data_db['number_caches_found'] + 1
             game_data_db['number_caches_left'] = game_data_db['number_caches_left'] - 1
             band = False
+            user_position = 0
+            count = 0
             for i in game_data_db['players']:
                 if(i['player_name'] == session['name']):
+                    user_position = count
                     i['found'] += 1
                     band = True
+
+                count += 1
             
             if(band != True):
                 game_data_db['players'].append({'player_name': session['name'], 'found':  1})
+                user_position = len(game_data_db['players']) - 1
             
-            if(game_data_db['number_caches_found'] == game_data_db['number_caches'] and game_data_db['number_caches_left'] == 0):
+            if(game_data_db['number_caches_found'] == game_data_db['number_caches'] and game_data_db['number_caches_left'] == 0 and game_data_db['number_caches'] == game_data_db['players'][user_position]['found']):
                 game_data_db['winner_name'] = session['name']
                 game_data_db['active'] = False
 
@@ -200,13 +201,6 @@ def save_play():
 def game():
     game_id = request.args.get('game')
     game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
-
-    swap = 0
-    for i in range(len(game_data_db['players']) - 1):
-        for j in range(len(game_data_db['players']) - i - 1):
-            if game_data_db['players'][j] > game_data_db['players'][j + 1]:
-                game_data_db['players'][j], game_data_db['players'][j + 1] = game_data_db['players'][j + 1], game_data_db['players'][j]
-                swap += 1
 
     return render_template("game.html", game_data=game_data_db)
 
