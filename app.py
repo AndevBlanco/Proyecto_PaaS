@@ -69,7 +69,6 @@ def home():
         else:
             game_list['games'].append(i)
 
-    print(game_list)
 
     return render_template('home.html', games_list=game_list)
 
@@ -77,7 +76,6 @@ def home():
 @app.route('/login', methods=['POST'])
 def login():
     authorization_url, state = flow.authorization_url()
-    print(state)
     session["state"] = state
     return redirect(authorization_url)
 
@@ -101,7 +99,6 @@ def callback():
     if (not user_exist):
         database.db.users.insert_one(
             {"uuid": session['google_id'], "name": session['name']})
-    print(session['google_id'])
     return redirect("/home")
 
 
@@ -113,13 +110,11 @@ def logout():
 
 @app.route("/protected_area")
 def protected_area():
-    print(session)
     return f"Hello {session['name']}! <br/> <a href='/logout'><button>Logout</button></a>"
 
 
 @app.route("/test")
 def test():
-    print(os.getenv("DB_URI"))
     database.db.collection.insert_one({"name": "John"})
     return "Connected to the data base!"
 
@@ -130,7 +125,6 @@ def logout():
 
 @app.route("/create")
 def create():
-    print(session)
     return render_template("create.html")
 
 
@@ -156,43 +150,50 @@ def save_game():
 @app.route("/play")
 def play():
     game_id = request.args.get('game')
-    game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
+    if(game_id):
+        game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
+        # for i in range(0, len(game_data_db['caches'])):
+        #     if(i < len(game_data_db['caches'])):
+        #         if(game_data_db['caches'][i]['found'] == True):
+        #             del game_data_db['caches'][i]
+        #             i -= 1
 
+        if(game_data_db['winner_name'] == session['name']):
+            game_data_db['winner_you'] = '¡Enhorabuena {}, eres el ganador del juego! \n ¡Vaya pedazo de crack!'.format(session['name'])
     
     return render_template("play.html", game_data=game_data_db)
 
 @app.route("/play", methods=["POST"])
 def save_play():
-    cache = int(request.form['cache'])
-    
-    game_id = request.form['id_play']
-    game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
-    game_data_db['caches'][cache]['user_uuid_find'] = session['google_id']
-    game_data_db['caches'][cache]['user_name_find'] = session['name']
-    game_data_db['caches'][cache]['found'] = True
-    game_data_db['number_caches_found'] = game_data_db['number_caches_found'] + 1
-    game_data_db['number_caches_left'] = game_data_db['number_caches_left'] - 1
-    
-    band = False
-    for i in game_data_db['players']:
-        if(i['player_name'] == session['name']):
-            i['found'] += 1
-            band = True
-    
-    if(band != True):
-        game_data_db['players'].append({'player_name': session['name'], 'found':  1})
-    
-    if(game_data_db['number_caches_found'] == game_data_db['number_caches'] and game_data_db['number_caches_left'] == 0):
-        game_data_db['winner_name'] = session['name']
-        game_data_db['active'] = False
+    if (request.method == "POST"):
+        cache = int(request.form['cache'])
+        game_id = request.form['id_play']
+        game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
+        if(game_data_db['caches'][cache]['found'] == False):
+            game_data_db['caches'][cache]['user_uuid_find'] = session['google_id']
+            game_data_db['caches'][cache]['user_name_find'] = session['name']
+            game_data_db['caches'][cache]['found'] = True
+            game_data_db['number_caches_found'] = game_data_db['number_caches_found'] + 1
+            game_data_db['number_caches_left'] = game_data_db['number_caches_left'] - 1
+            band = False
+            for i in game_data_db['players']:
+                if(i['player_name'] == session['name']):
+                    i['found'] += 1
+                    band = True
+            
+            if(band != True):
+                game_data_db['players'].append({'player_name': session['name'], 'found':  1})
+            
+            if(game_data_db['number_caches_found'] == game_data_db['number_caches'] and game_data_db['number_caches_left'] == 0):
+                game_data_db['winner_name'] = session['name']
+                game_data_db['active'] = False
 
-
-    print(game_data_db)
 
     database.db.games.update_one({"_id": ObjectId(game_id)}, {"$set": game_data_db})
 
     # return render_template("play.html", game_data=game_data_db)
-    return redirect(request.url)
+    # return redirect(request.url)
+    return redirect(url_for("play", game=game_id))
 
 
 @app.route("/game")
@@ -200,13 +201,31 @@ def game():
     game_id = request.args.get('game')
     game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
 
+    swap = 0
+    for i in range(len(game_data_db['players']) - 1):
+        for j in range(len(game_data_db['players']) - i - 1):
+            if game_data_db['players'][j] > game_data_db['players'][j + 1]:
+                game_data_db['players'][j], game_data_db['players'][j + 1] = game_data_db['players'][j + 1], game_data_db['players'][j]
+                swap += 1
+
     return render_template("game.html", game_data=game_data_db)
 
 
 @app.route("/game", methods=["POST"])
 def restart():
     if (request.method == "POST"):
-        print("helooo")
-        # game_data_db = database.db.games.update_one({"_id": ObjectId(game_id)})
+        game_id = request.args.get('game')
+        game_data_db = database.db.games.find_one({"_id": ObjectId(game_id)})
+        game_data_db['number_caches_found'] = 0
+        game_data_db['number_caches_left'] = game_data_db['number_caches']
+        game_data_db['winner_name'] = ''
+        game_data_db['active'] = True
+        game_data_db['players'] = []
+        for i in game_data_db['caches']:
+            i['user_name_find'] = ''
+            i['user_uuid_find'] = ''
+            i['found'] = False
+            
+        database.db.games.update_one({"_id": ObjectId(game_id)}, {"$set": game_data_db})
 
-    return 'helo'
+    return redirect("/home")

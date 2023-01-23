@@ -54,7 +54,7 @@ $('#map').click(function (event) {
                         <div class="modal-body">
                             <input type="text" class="form-control w-100" name="clue${count}" placeholder="Pista" required>
                             <br>
-                            <input class="btn btn-info" type="file" name="image${count}" accept="image/png, image/gif, image/jpeg, image/jpg" />
+                            <input class="btn btn-secondary" type="file" name="image${count}" accept="image/png, image/gif, image/jpeg, image/jpg" />
                         </div>
                         </div>
                     </div>

@@ -38,42 +38,44 @@ console.log(transform_obj3);
 var obj = JSON.parse(transform_obj3);
 for(var i in obj){
     // new L.marker(L.latLng(obj[i]['latitude'], obj[i]['longitude'])).addTo(map);
-    $('#rowCachesFound').append(
-        `<form action="/play" method="post" enctype = "multipart/form-data">
-            <input type="text" class="form-control" name="id_play" value="${getUrlParameter('game')}" style="display:none;">
-            <div class="row align-items-center my-3" id="row${i}">
-                <div class="col-3">
-                    <input type="text" class="form-control" value="${obj[i]['clue']}" readonly>
-                </div>
-                <div class="col-2">
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#image${i}">
-                        Ver imagen
-                    </button>
-                    <!-- Modal -->
-                    <div class="modal fade" id="image${i}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Pista ${obj[i]['clue']}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <img src="" alt="Pista imagen" id="id_image${i}" style="height:400px; width:400px;"/>
+    if(!obj[i]['found']){
+        $('#rowCachesFound').append(
+            `<form action="/play" method="post" enctype = "multipart/form-data">
+                <input type="text" class="form-control" name="id_play" value="${getUrlParameter('game')}" style="display:none;">
+                <div class="row align-items-center my-3" id="row${i}">
+                    <div class="col-3">
+                        <input type="text" class="form-control" value="${obj[i]['clue']}" readonly>
+                    </div>
+                    <div class="col-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#image${i}">
+                            Ver imagen
+                        </button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="image${i}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Pista ${obj[i]['clue']}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <img src="" alt="Pista imagen" id="id_image${i}" style="height:400px; width:400px;"/>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    <div class="col-auto">
+                        <input class="btn btn-secondary" type="file" id="file" name="images${i}" accept="image/png, image/gif, image/jpeg, image/jpg"/>
+                    </div>
+                    <input type="text" name="cache" style="display: none;" value="${i}">
+                    <div class="col-2">
+                        <button class="btn btn-success" type="submit">Validar</button>
+                    </div>
                 </div>
-                <div class="col-auto">
-                    <input class="btn btn-info" type="file" id="file" name="images${i}" accept="image/png, image/gif, image/jpeg, image/jpg"/>
-                </div>
-                <input type="text" name="cache" style="display: none;" value="${i}">
-                <div class="col-2">
-                    <button class="btn btn-success" type="submit">Validar</button>
-                </div>
-            </div>
-        </form>
-    `);
+            </form>
+        `);
+    }
     var link_image = `/static/img/${obj[i]['image']}`;
     console.log(link_image);
     console.log(i);
